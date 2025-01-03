@@ -1,0 +1,75 @@
+-- Script Kaitun (Auto Farm Fruit) cho Blox Fruits
+-- Da loai bo tieng Viet co dau de dam bao tuong thich
+
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local workspace = game:GetService("Workspace")
+local notificationService = game:GetService("StarterGui")
+
+-- Cau hinh
+local settings = {
+    autoFruit = true,   -- Tu dong tim trai cay
+    autoEat = true,     -- Tu dong an trai cay
+    teleportSpeed = 200 -- Toc do dich chuyen
+}
+
+-- Ham gui thong bao tren man hinh
+function sendNotification(title, text, duration)
+    notificationService:SetCore("SendNotification", {
+        Title = title,
+        Text = text,
+        Duration = duration or 5
+    })
+end
+
+-- Ham dich chuyen muot
+function smoothTeleport(targetPos)
+    local tweenService = game:GetService("TweenService")
+    local tweenInfo = TweenInfo.new((targetPos - character.HumanoidRootPart.Position).magnitude / settings.teleportSpeed, Enum.EasingStyle.Linear)
+    local tween = tweenService:Create(character.HumanoidRootPart, tweenInfo, {CFrame = CFrame.new(targetPos)})
+    tween:Play()
+    tween.Completed:Wait()
+end
+
+-- Ham tim trai cay gan nhat
+function findClosestFruit()
+    local closestFruit = nil
+    local shortestDistance = math.huge
+
+    for _, fruit in pairs(workspace:GetChildren()) do
+        if fruit.Name == "Fruit" and fruit:IsA("Model") and fruit:FindFirstChild("Handle") then
+            local distance = (fruit.Handle.Position - character.HumanoidRootPart.Position).magnitude
+            if distance < shortestDistance then
+                closestFruit = fruit
+                shortestDistance = distance
+            end
+        end
+    end
+
+    return closestFruit
+end
+
+-- Chuc nang Auto Fruit
+function autoFruit()
+    while settings.autoFruit do
+        wait(1)
+        local fruit = findClosestFruit()
+
+        if fruit then
+            sendNotification("Trai cay xuat hien!", "Dang dich chuyen den vi tri trai cay...", 5)
+            smoothTeleport(fruit.Handle.Position + Vector3.new(0, 5, 0))
+            
+            -- Tu dong an trai cay (neu bat)
+            if settings.autoEat then
+                wait(1)
+                fireproximityprompt(fruit.Handle.ProximityPrompt)
+                sendNotification("Da an trai cay!", "Trai cay da duoc tieu thu.", 5)
+            end
+        else
+            print("Khong tim thay trai cay...")
+        end
+    end
+end
+
+-- Khoi chay Auto Fruit
+spawn(autoFruit)
