@@ -1,0 +1,43 @@
+-- Script Auto Farm cho Blox Fruits
+
+local player = game.Players.LocalPlayer
+local character = player.Character or player.CharacterAdded:Wait()
+local humanoid = character:WaitForChild("Humanoid")
+local workspace = game:GetService("Workspace")
+
+-- Ham tim quai vat gan nhat
+function getClosestEnemy()
+    local closestEnemy = nil
+    local closestDistance = math.huge
+    for _, obj in pairs(workspace:GetChildren()) do
+        if obj:IsA("Model") and obj:FindFirstChild("Humanoid") then
+            local distance = (character.HumanoidRootPart.Position - obj.HumanoidRootPart.Position).Magnitude
+            if distance < closestDistance then
+                closestDistance = distance
+                closestEnemy = obj
+            end
+        end
+    end
+    return closestEnemy
+end
+
+-- Ham auto farm (tu dong danh quai)
+function autoFarm()
+    while true do
+        local enemy = getClosestEnemy()
+        if enemy then
+            -- Di chuyen toi quai vat va tan cong
+            local enemyPosition = enemy.HumanoidRootPart.Position
+            character.HumanoidRootPart.CFrame = CFrame.new(enemyPosition)
+            
+            -- Goi ham tan cong (co the them skill va nap mau)
+            -- Vi du: neu ban co skill, goi skill o day
+            -- player:WaitForChild("Humanoid"):Attack(enemy) -- Tu dong tan cong
+            
+        end
+        wait(1)  -- Chuyen sang qua quai vat khac sau 1 giay
+    end
+end
+
+-- Bat dau auto farm
+autoFarm()
